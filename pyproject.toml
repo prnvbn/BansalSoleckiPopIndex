@@ -1,0 +1,10 @@
+[project]
+name = "bansal-solecki-pop-index"
+version = "0.1.0"
+description = "Bansal Solecki Pop Index"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "pandas>=2.2.3",
+    "requests>=2.32.3",
+]
