@@ -33,15 +33,16 @@ def save_passport_data(data, cache_file: str = CACHE_FILE):
         json.dump(data, f)
 
 def henley_passport_index(code, base: str = BASE):
-    """Returns the HP index score i.e. the number of countries with visa-free access for a given country code."""
+    """Returns the HP index score and list of countries with visa-free access for a given country code."""
     try:
         res = requests.get(f'{base}/api/passports/{code}/countries')
         countries_data = res.json()['default']
-        visa_free_count = sum(1 for country in countries_data if country.get('pivot', {}).get('is_visa_free') == 1)
-        return visa_free_count
+        countries = [country['name'] for country in countries_data if country.get('pivot', {}).get('is_visa_free') == 1]
+        visa_free_count = len(countries)
+        return visa_free_count, countries
     except Exception as e:
         print(f"Error getting visa-free count for {code}: {e}")
-        return 0
+        return 0, []
 
 def build_passport_dataframe(base: str = BASE):
     """Build and return a DataFrame containing passport power rankings."""
@@ -54,11 +55,12 @@ def build_passport_dataframe(base: str = BASE):
     # First build DataFrame with just HP indices
     df_data = []
     for passport in sorted(data, key=lambda x: x['name']):
-        hp_index = henley_passport_index(passport['code'], base)
+        hp_index, countries = henley_passport_index(passport['code'], base)
         df_data.append({
             'country_name': passport['name'],
             'country_code': passport['code'],
-            'hp_index': hp_index
+            'hp_index': hp_index,
+            'countries': countries
         })
     
     df = pd.DataFrame(df_data)
@@ -86,10 +88,29 @@ def add_strength_columns(df: pd.DataFrame) -> pd.DataFrame:
  
     return df_sorted
 
+def add_bsp(df: pd.DataFrame) -> pd.DataFrame:
+    total_countries = len(df)
+    df['bsp_weight'] = df['hp_index'] / total_countries
+
+    country_to_weight = dict(zip(df['country_name'], df['bsp_weight']))
+    df['bsp_index'] = df['countries'].apply(lambda countries: sum(country_to_weight.get(country, 0) for country in countries))
+
+    df = df.sort_values('bsp_index', ascending=False)
+    df['bsp_strength'] = range(1, len(df) + 1)
+
+    df['bsp_strength_diff'] = df['hp_strength'] - df['bsp_strength']
+
+    return df
 
 df = hp_index_df()
-df_with_strength = add_strength_columns(df)
+df = add_strength_columns(df)
+df = add_bsp(df)
+
 print("\nPassport Power Rankings:")
-print(df_with_strength.head().to_string(index=False))
+
+
+df = df[df['bsp_strength_diff'] != 0][['country_name', 'hp_strength', 'bsp_strength', 'bsp_strength_diff']]
+df = df.sort_values('bsp_strength_diff', ascending=False)
+print(df.to_string(index=False))
 
 
