@@ -113,4 +113,6 @@ df = df[df['bsp_strength_diff'] != 0][['country_name', 'hp_strength', 'bsp_stren
 df = df.sort_values('bsp_strength_diff', ascending=False)
 print(df.to_string(index=False))
 
+print("\nStats on the difference in the HP and BSP index scores:")
+print(df['bsp_strength_diff'].describe())
 
