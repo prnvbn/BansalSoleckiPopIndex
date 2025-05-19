@@ -81,10 +81,10 @@ def hp_index_df(base: str = BASE, cache_file: str = DF_CACHE_FILE) -> pd.DataFra
         pickle.dump(df, f)
     return df
 
-def add_strength_columns(df: pd.DataFrame) -> pd.DataFrame:
-    """Add strength columns for both HP and BS indices."""
+def add_rank_columns(df: pd.DataFrame) -> pd.DataFrame:
+    """Add rank columns for both HP and BS indices."""
     df_sorted = df.sort_values('hp_index', ascending=False)
-    df_sorted['hp_strength'] = range(1, len(df_sorted) + 1)
+    df_sorted['hp_rank'] = range(1, len(df_sorted) + 1)
  
     return df_sorted
 
@@ -96,23 +96,23 @@ def add_bsp(df: pd.DataFrame) -> pd.DataFrame:
     df['bsp_index'] = df['countries'].apply(lambda countries: sum(country_to_weight.get(country, 0) for country in countries))
 
     df = df.sort_values('bsp_index', ascending=False)
-    df['bsp_strength'] = range(1, len(df) + 1)
+    df['bsp_rank'] = range(1, len(df) + 1)
 
-    df['bsp_strength_diff'] = df['hp_strength'] - df['bsp_strength']
+    df['bsp_rank_diff'] = df['hp_rank'] - df['bsp_rank']
 
     return df
 
 df = hp_index_df()
-df = add_strength_columns(df)
+df = add_rank_columns(df)
 df = add_bsp(df)
 
 print("\nPassport Power Rankings:")
 
 
-df = df[df['bsp_strength_diff'] != 0][['country_name', 'hp_strength', 'bsp_strength', 'bsp_strength_diff']]
-df = df.sort_values('bsp_strength_diff', ascending=False)
+df = df[df['bsp_rank_diff'] != 0][['country_name', 'hp_rank', 'bsp_rank', 'bsp_rank_diff']]
+df = df.sort_values('bsp_rank_diff', ascending=False)
 print(df.to_string(index=False))
 
 print("\nStats on the difference in the HP and BSP index scores:")
-print(df['bsp_strength_diff'].describe())
+print(df['bsp_rank_diff'].describe())
 

@@ -18,7 +18,7 @@ On comparing this to the widely accepted [Henley Passport Index](https://www.hen
 - The following countries had a jump of more than 10 upwards
 
 ```
- country_name  hp_strength  bsp_strength  bsp_strength_diff
+ country_name  hp_rank  bsp_rank  bsp_rank_diff
        Kosovo          114            96                 18
      Mongolia          139           126                 13
          Peru           70            58                 12
@@ -34,7 +34,7 @@ On comparing this to the widely accepted [Henley Passport Index](https://www.hen
 <summary>Full output showing the difference in the HP and BSP index scores</summary>
 
 ```
-                  country_name  hp_strength  bsp_strength  bsp_strength_diff
+                  country_name  hp_rank  bsp_rank  bsp_rank_diff
                         Kosovo          114            96                 18
                       Mongolia          139           126                 13
                           Peru           70            58                 12
